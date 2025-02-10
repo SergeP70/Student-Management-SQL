@@ -75,22 +75,30 @@ class MainWindow(QMainWindow):
         # create status bar and elements
         self.statusbar = QStatusBar()
         self.setStatusBar(self.statusbar)
+        self.statusbar.hide()
 
-        # Detect a cell click
-        self.tblStudents.cellClicked.connect(self.cell_clicked)
-
-    def cell_clicked(self):
         btnEdit = QPushButton('Edit record')
         btnEdit.clicked.connect(self.edit)
         btnDelete = QPushButton('Delete record')
         btnDelete.clicked.connect(self.delete)
-
-        children = self.findChildren(QPushButton)
-        if children:
-            for child in children:
-                self.statusbar.removeWidget(child)
         self.statusbar.addWidget(btnEdit)
         self.statusbar.addWidget(btnDelete)
+
+        # Detect a cell click and activate toolbar buttons
+        self.tblStudents.cellClicked.connect(self.showStatusBarButtons)
+        self.tblStudents.itemChanged.connect(self.hideStatusBarButtons)
+        self.tblStudents.focusOutEvent = self.tableFocusOutEvent
+
+    def showStatusBarButtons(self):
+        self.statusbar.show()
+
+    def hideStatusBarButtons(self):
+        self.statusbar.hide()
+
+    def tableFocusOutEvent(self, event):
+        # This method will be called when the table loses focus
+        self.statusbar.hide()
+        event.accept()
 
     def load_data(self):
         connection = DatabaseConnection().connect()
